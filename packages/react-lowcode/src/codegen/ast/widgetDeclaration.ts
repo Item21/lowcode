@@ -28,13 +28,13 @@ export function isDataTableWidget(sourceCode:string, position: SourceLineCol): b
 
     if(astCode){
         let identifier = findIdentifier(astCode)
-
+        
         if(identifier){
-            isDataTableDeclaration = identifier.getText() === 'DataGrid'
+            isDataTableDeclaration = identifier.getText() === 'DataGrid' || identifier.parent.getText() === "TableCell"
         }else{
             let dataGridNode = astCode.getChildAt(1) as ts.JsxSelfClosingElement
 
-            if(dataGridNode && dataGridNode.getChildAt(0)?.getChildAt(1)?.getText() === 'DataGrid')//todo(mch): very very uglu, need to be refactored to be more generic
+            if(dataGridNode && dataGridNode.getChildAt(0)?.getChildAt(1)?.getText() === 'DataGrid' || astCode.getChildAt(0).getText() === "<TableCell>")//todo(mch): very very uglu, need to be refactored to be more generic
                 isDataTableDeclaration = true
         }
     }
@@ -51,7 +51,6 @@ export function isFormWidget(sourceCode: string, position: SourceLineCol): boole
 
         if(variableDeclaration){
             const identifier = findIdentifier(variableDeclaration)
-
             if(identifier){//TODO(mch): hardly need to refactor this bad solution
                 isFormWidget = identifier.getText().startsWith('Generated') || identifier.getText().indexOf('Formik') > -1
             }
@@ -101,7 +100,7 @@ function findParentVariableDeclaration(root: ts.Node): ts.VariableDeclaration | 
     let declaration: ts.VariableDeclaration | undefined = undefined
 
     let parentNode = root.parent
-
+    
     while(parentNode){
         if(ts.isVariableDeclaration(parentNode)){
             declaration = parentNode

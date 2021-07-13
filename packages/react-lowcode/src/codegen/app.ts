@@ -10,10 +10,10 @@ import { getNestedOfType } from '../../../graphql-lowcode/src/generate/generateG
 import { IntrospectionQuery } from '../../../graphql-lowcode/src/generate/types'
 
 // generates CRUD React pages (master-detail, eg. orders list, order detail form) from typescript
-export function generatePages(introspection: IntrospectionQuery, io: CodeRW & CodeDir, options?: CodegenOptions) {
+export function generatePages(introspection: IntrospectionQuery | string, io: CodeRW & CodeDir, options?: CodegenOptions) {
   const printer = ts.createPrinter({ newLine: ts.NewLineKind.LineFeed })
-
   options?.names.map(name => {
+    introspection = introspection as IntrospectionQuery
     //generates graphql queries for each entity name in props
     const graphqlQueries = generateGraphqlFile(introspection, name)
     if (graphqlQueries != '') io.writeFile(`./src/views/${name}/${name}.graphql`, graphqlQueries)
