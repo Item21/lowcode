@@ -2,7 +2,7 @@
     "name": "iteria-json-editor",
     "displayName": "Iteria Json editor",
     "description": "Generate a table view editor of the active JSON document",
-    "version": "1.0.0",
+    "version": "1.0.28",
     "publisher": "MartinBilansky",
     "engines": {
         "vscode": "^1.32.0"
@@ -22,6 +22,7 @@
         "onView:jsonEditor"
     ],
     "main": "./out/src/extension",
+    "browser": "./out/src/extension",
     "repository": {
         "type": "git",
         "url": "https://github.com/iteria-app/lowcode/tree/master/packages/vscode"
@@ -80,9 +81,5 @@
         "tslint-microsoft-contrib": "^5.0.3",
         "typescript": "^4.3.2",
         "vsce": "^1.75.0"
-    },
-    "dependencies": {
-        "path": "^0.12.7",
-        "svelte": "^3.24.1"
     }
 }

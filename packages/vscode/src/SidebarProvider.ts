@@ -1,15 +1,14 @@
 import * as vscode from "vscode";
 import * as fs from 'fs';
-import * as path from 'path'
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
-    vscode.window.onDidChangeActiveTextEditor(() => {
-      this.onActiveEditorChanged()
-    }
+      vscode.window.onDidChangeActiveTextEditor(() => {
+        this.onActiveEditorChanged()
+      }
     );
 
     vscode.workspace.onDidSaveTextDocument(() => this.onActiveEditorChanged());
@@ -22,7 +21,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       // Allow scripts in the webview
       enableScripts: true,
-
       localResourceRoots: [this._extensionUri],
     };
 
@@ -40,9 +38,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           let data = fs.readFileSync(element.fileName)
           if (data.toString() !== "") {
             const jsonData = JSON.parse(data.toString())
-            const fileNameWE = path.basename(element.fileName)
-            const extension = path.extname(element.fileName)
-            const fileName = path.basename(fileNameWE, extension)
+            const name = element.fileName.substr(
+              element.fileName.lastIndexOf("/") + 1
+            )
+            const fileName = this.stripExtension(name)
             const value = json[fileName]
             const diff = this.getDiffOfJsons(value, jsonData)
             if (Object.keys(diff).length !== 0) {
@@ -54,8 +53,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                   value[diffKey] = diff[diffKey]
               }
               let finalObject = {}
-              finalObject = value   
-              this.createFiles(element.fileName, "", JSON.stringify(finalObject, undefined, 2))
+              finalObject = value
+              this.createFiles(element.fileName.substr(
+                  0,
+                  element.fileName.lastIndexOf("/")
+                ), 
+                name, 
+                JSON.stringify(finalObject, undefined, 2)
+              )
             }
           }
         }
@@ -76,6 +81,16 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
       console.log('Success');
     });
+  }
+
+  private stripExtension(fileName: string) {
+    const dot = fileName.lastIndexOf(".")
+    const hasExtension = dot > 0 && dot < fileName.length
+    if (hasExtension) {
+      return fileName.substring(0, dot)
+    }
+  
+    return fileName
   }
 
 
@@ -108,9 +123,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       openFiles.forEach(element => {
         if (element.languageId == 'json') {
           let data = fs.readFileSync(element.fileName)
-          const fileNameWE = path.basename(element.fileName)
-          const extension = path.extname(element.fileName)
-          const fileName = path.basename(fileNameWE, extension)
+          const name = element.fileName.substr(
+            element.fileName.lastIndexOf("/") + 1
+          )
+          const fileName = this.stripExtension(name)
           buildObject[fileName] = JSON.parse(data.toString())
           finalObject = {...finalObject, ...buildObject}
         }
@@ -131,9 +147,10 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       openFiles.forEach(element => {
         if (element.languageId === 'json') {
           let data = fs.readFileSync(element.fileName)
-          const fileNameWE = path.basename(element.fileName)
-          const extension = path.extname(element.fileName)
-          const fileName = path.basename(fileNameWE, extension)
+          const name = element.fileName.substr(
+            element.fileName.lastIndexOf("/") + 1
+          )
+          const fileName = this.stripExtension(name)
           buildObject[fileName] = JSON.parse(data.toString())
           finalObject = {...finalObject, ...buildObject}
         }
